@@ -70,4 +70,32 @@ describe("POST /events", () => {
       })
     );
   });
+
+  it("should update an existing event", async () => {
+    const event = await prisma.event.create({
+      data: {
+        name: "Evento de Teste",
+        date: new Date("2025-05-01T00:00:00.000Z"),
+      },
+    });
+    const eventPut = {
+      name: "Evento Atualizado",
+      date: new Date("2025-06-01T00:00:00.000Z"),
+    };
+  
+    const { status, body } = await api
+      .put(`/events/${event.id}`)
+      .send(eventPut);
+
+    expect(status).toBe(httpStatus.OK);
+    expect(body).toEqual(
+      expect.objectContaining({
+        id: event.id,
+        name: eventPut.name,
+        date: expect.any(String),
+      })
+    );
+  });
+  
+
 });

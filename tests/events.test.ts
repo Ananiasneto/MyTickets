@@ -1,5 +1,6 @@
 
 import prisma from "database";
+import httpStatus from "http-status";
 import app from "index";
 import supertest from "supertest";
  
@@ -47,3 +48,26 @@ describe("get /events",()=>{
           );
     })
 })
+
+
+describe("POST /events", () => {
+  beforeEach(async () => {
+    await prisma.event.deleteMany();
+  });
+
+  it("should create a new event", async () => {
+    const data = {
+      name: "Evento de Teste",
+      date: new Date("2025-05-01T00:00:00.000Z"),
+    };
+    const { status, body } = await api.post("/events").send(data);
+    expect(status).toBe(httpStatus.CREATED)
+    expect(body).toEqual(
+      expect.objectContaining({
+        id: expect.any(Number),
+        name: data.name,
+        date: expect.any(String),
+      })
+    );
+  });
+});

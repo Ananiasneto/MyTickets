@@ -112,10 +112,11 @@ describe("delete /events",()=>{
        date: new Date("2025-05-01T00:00:00.000Z"),
       },
       });
-      
-    const {status}= await api.delete(`/events/${id}`)
+    
+    const {status}= await api
+    .delete(`/events/${id}`)
 
-    expect(status).toBe(httpStatus.NO_CONTENT);
+    expect(status).toBe(httpStatus.NO_CONTENT)
     
   })
   

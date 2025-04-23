@@ -71,7 +71,7 @@ describe("POST /events", () => {
     );
   });
 
-  it("should update an existing event", async () => {
+  it("should update event", async () => {
     const event = await prisma.event.create({
       data: {
         name: "Evento de Teste",
@@ -99,3 +99,27 @@ describe("POST /events", () => {
   
 
 });
+
+
+describe("delete /events",()=>{
+  beforeEach(async () => {
+    await prisma.event.deleteMany()
+  });
+  it("should delet event",async ()=>{
+    const {id} = await prisma.event.create({
+       data: {
+       name: "Evento de Teste",
+       date: new Date("2025-05-01T00:00:00.000Z"),
+      },
+      });
+      
+    const {status}= await api.delete(`/events/${id}`)
+
+    expect(status).toBe(httpStatus.NO_CONTENT);
+    
+  })
+  
+
+
+
+})

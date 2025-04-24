@@ -1,7 +1,6 @@
 import prisma from "database";
 import httpStatus from "http-status";
 import app from "index";
-import { object } from "joi";
 import supertest from "supertest";
  
 const api=supertest(app);
@@ -94,7 +93,6 @@ describe("PUT /tickets/use/:id", () => {
         eventId: event.id,
       },
     });
-  console.log(ticket.id)
     const { status } = await api.put(`/tickets/use/${ticket.id}`);
     expect(status).toBe(httpStatus.NO_CONTENT);
   })

@@ -5,7 +5,6 @@ import app from "index";
 import supertest from "supertest";
  
 const api=supertest(app);
-
 describe("get /events",()=>{
 
   beforeEach(async () => {
@@ -29,6 +28,10 @@ describe("get /events",()=>{
             }),
           ]));
         })
+    it("should return an empty array ", async () => {
+      const { body } = await api.get("/events");
+      expect(body).toEqual([]);
+      });
     
 
     it("should return an especific event",async()=>{
@@ -47,7 +50,14 @@ describe("get /events",()=>{
             }),
           );
     })
+
+    it("should return a bad request if id invalid(not a number or id<0)",async()=>{
+      const id="idInvalido";
+        const {status }=await api.get(`/events/${id}`);
+        expect(status).toBe(httpStatus.BAD_REQUEST)
+    })
 })
+
 
 
 describe("POST /events", () => {
@@ -82,10 +92,7 @@ describe("POST /events", () => {
       name: "Evento Atualizado",
       date: new Date("2025-06-01T00:00:00.000Z"),
     };
-  
-    const { status, body } = await api
-      .put(`/events/${event.id}`)
-      .send(eventPut);
+    const { status, body } = await api.put(`/events/${event.id}`).send(eventPut);
 
     expect(status).toBe(httpStatus.OK);
     expect(body).toEqual(
@@ -96,11 +103,7 @@ describe("POST /events", () => {
       })
     );
   });
-  
-
 });
-
-
 describe("delete /events",()=>{
   beforeEach(async () => {
     await prisma.event.deleteMany()
@@ -113,14 +116,8 @@ describe("delete /events",()=>{
       },
       });
     
-    const {status}= await api
-    .delete(`/events/${id}`)
-
+    const {status}= await api.delete(`/events/${id}`)
     expect(status).toBe(httpStatus.NO_CONTENT)
     
   })
-  
-
-
-
 })

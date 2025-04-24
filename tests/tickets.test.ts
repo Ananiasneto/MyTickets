@@ -74,3 +74,28 @@ describe("post /tickets",()=>{
         }))
           })
       })
+describe("PUT /tickets/use/:id", () => {
+  beforeEach(async () => {
+    await prisma.event.deleteMany()
+  });
+  it("should update ticket by id and return status 204", async () => {
+    const event = await prisma.event.create({
+      data: {
+        name: "Evento test",
+        date: new Date("2025-05-01T00:00:00.000Z"),
+      },
+    });
+  
+    const ticket = await prisma.ticket.create({
+      data: {
+        owner: "Ananias",
+        code: "ABC123",
+        used: false,
+        eventId: event.id,
+      },
+    });
+  console.log(ticket.id)
+    const { status } = await api.put(`/tickets/use/${ticket.id}`);
+    expect(status).toBe(httpStatus.NO_CONTENT);
+  })
+})

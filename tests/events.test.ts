@@ -83,13 +83,28 @@ describe("POST /events", () => {
       })
     );
   });
-  it("should return a Unprocessable entity because invalid schema", async () => {
+  it("should return a stts Unprocessable entity because invalid schema", async () => {
     const data = {
       name: "Evento de Teste",
     };
     const { status } = await api.post("/events").send(data);
     expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY)
     
+  });
+
+  it("should return a stts Conflict because duplicate names.", async () => {
+    await prisma.event.create({
+      data: {
+      name: "Evento de Teste",
+      date: new Date("2025-05-01T00:00:00.000Z"),
+     },
+     });
+    const data = {
+      name: "Evento de Teste",
+      date: new Date("2025-05-03T00:00:00.000Z"),
+    };
+    const { status } = await api.post("/events").send(data);
+    expect(status).toBe(httpStatus.CONFLICT)
   });
 
   it("should update event", async () => {

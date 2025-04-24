@@ -1,6 +1,7 @@
 import prisma from "database";
 import httpStatus from "http-status";
 import app from "index";
+import { object } from "joi";
 import supertest from "supertest";
  
 const api=supertest(app);
@@ -44,3 +45,32 @@ describe("get /tickets",()=>{
           ]));
         })
     })
+describe("post /tickets",()=>{
+  beforeEach(async () => {
+    await prisma.event.deleteMany()
+ });
+      
+    it("should create ticket and return stts 200 and ticket",async()=>{
+      const {id} = await prisma.event.create({
+        data: {
+        name: "Evento de Teste",
+        date: new Date("2025-05-01T00:00:00.000Z"),
+         },
+      });
+      const {body,status }=await api.post(`/tickets`).send({
+        owner: "Ananias",
+        code: "ABC123",
+        eventId:id
+      });
+    
+      expect(status).toBe(httpStatus.CREATED);
+
+      expect(body).toEqual(expect.objectContaining({
+          id: expect.any(Number),
+              owner: expect.any(String),
+              code: expect.any(String), 
+              used: expect.any(Boolean), 
+              eventId: id, 
+        }))
+          })
+      })

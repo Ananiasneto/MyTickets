@@ -33,7 +33,6 @@ describe("get /events",()=>{
       expect(body).toEqual([]);
       });
     
-
     it("should return an especific event",async()=>{
       const {id}=await prisma.event.create({
         data:{
@@ -56,9 +55,13 @@ describe("get /events",()=>{
         const {status }=await api.get(`/events/${id}`);
         expect(status).toBe(httpStatus.BAD_REQUEST)
     })
+
+    it("should return a not found if event not exist",async()=>{
+      const id=1;
+        const {status }=await api.get(`/events/${id}`);
+        expect(status).toBe(httpStatus.NOT_FOUND)
+    })
 })
-
-
 
 describe("POST /events", () => {
   beforeEach(async () => {
@@ -79,6 +82,14 @@ describe("POST /events", () => {
         date: expect.any(String),
       })
     );
+  });
+  it("should return a Unprocessable entity because invalid schema", async () => {
+    const data = {
+      name: "Evento de Teste",
+    };
+    const { status } = await api.post("/events").send(data);
+    expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY)
+    
   });
 
   it("should update event", async () => {

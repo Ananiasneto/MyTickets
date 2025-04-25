@@ -1,9 +1,10 @@
 
-import prisma from "database";
 import httpStatus from "http-status";
 import app from "index";
 import supertest from "supertest";
 import { createEvent, createEventFactory } from "./factory/event-factory";
+import prisma from "database";
+
 
  
 const api=supertest(app);
@@ -48,7 +49,7 @@ describe("get /events",()=>{
     })
 
     it("should return a not found if event not exist",async()=>{
-      const id=1;
+      const id=999999;
         const {status }=await api.get(`/events/${id}`);
         expect(status).toBe(httpStatus.NOT_FOUND)
     })
@@ -88,6 +89,12 @@ describe("POST /events", () => {
     expect(status).toBe(httpStatus.CONFLICT)
   });
 
+
+});
+describe("PUT /events", () => {
+  beforeEach(async () => {
+    await prisma.event.deleteMany();
+  });
   it("should update event", async () => {
     const event = await createEvent();
     const eventPut =await createEventFactory();
@@ -102,6 +109,36 @@ describe("POST /events", () => {
       })
     );
   });
+  it("should return a stts Unprocessable entity because invalid schema", async () => {
+    const event = await createEvent();
+    const eventPut =await createEventFactory();
+    const { status } = await api.put(`/events/${event.id}`).send(eventPut.name);
+    expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY)
+    
+  });
+
+  it("should return a bad request if id invalid(not a number or id<0)",async()=>{
+    const id="idInvalido";
+    const eventPut =await createEventFactory();
+      const {status }=await api.put(`/events/${id}`).send(eventPut);
+      expect(status).toBe(httpStatus.BAD_REQUEST)
+  })
+  it("should return a not found if event not exist",async()=>{
+    const id=999999;
+    const eventPut =await createEventFactory();
+      const {status }=await api.put(`/events/${id}`).send(eventPut);
+      expect(status).toBe(httpStatus.NOT_FOUND)
+  })
+  it("should return a conflict if exist equal names",async()=>{
+    const event = await createEvent();
+    const eventPut = await createEvent();
+    const data={name:eventPut.name,date:event.date}
+      const {status }=await api.put(`/events/${event.id}`).send(data);
+      expect(status).toBe(httpStatus.CONFLICT)
+  })
+
+
+
 });
 describe("delete /events",()=>{
   beforeEach(async () => {
@@ -113,5 +150,16 @@ describe("delete /events",()=>{
     const {status}= await api.delete(`/events/${id}`)
     expect(status).toBe(httpStatus.NO_CONTENT)
     
+  })
+
+  it("should return a bad request if id invalid(not a number or id<0)",async()=>{
+    const id="idInvalido";
+      const {status }=await api.delete(`/events/${id}`);
+      expect(status).toBe(httpStatus.BAD_REQUEST)
+  })
+  it("should return a not found if event not exist",async()=>{
+    const id=999999;
+      const {status }=await api.delete(`/events/${id}`);
+      expect(status).toBe(httpStatus.NOT_FOUND)
   })
 })

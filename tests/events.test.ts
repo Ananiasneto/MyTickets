@@ -3,6 +3,8 @@ import prisma from "database";
 import httpStatus from "http-status";
 import app from "index";
 import supertest from "supertest";
+import { createEvent, createEventFactory } from "./factory/event-factory";
+
  
 const api=supertest(app);
 describe("get /events",()=>{
@@ -12,13 +14,7 @@ describe("get /events",()=>{
   });
 
     it("should return an array of events",async()=>{
-      await prisma.event.create({
-        data:{
-          name: "Evento de Teste",
-        date: new Date("2025-05-01T00:00:00.000Z"),
-        }
-      })
-      
+      await createEvent();
         const {body }=await api.get("/events");
         expect(body).toEqual(expect.arrayContaining([
             expect.objectContaining({
@@ -34,12 +30,7 @@ describe("get /events",()=>{
       });
     
     it("should return an especific event",async()=>{
-      const {id}=await prisma.event.create({
-        data:{
-          name: "Evento de Teste",
-        date: new Date("2025-05-01T00:00:00.000Z"),
-        }
-      })
+      const {id}=await createEvent();
         const {body }=await api.get(`/events/${id}`);
         expect(body).toEqual(
             expect.objectContaining({
@@ -69,10 +60,7 @@ describe("POST /events", () => {
   });
 
   it("should create a new event", async () => {
-    const data = {
-      name: "Evento de Teste",
-      date: new Date("2025-05-01T00:00:00.000Z"),
-    };
+   const data = await createEventFactory();
     const { status, body } = await api.post("/events").send(data);
     expect(status).toBe(httpStatus.CREATED)
     expect(body).toEqual(
@@ -84,40 +72,25 @@ describe("POST /events", () => {
     );
   });
   it("should return a stts Unprocessable entity because invalid schema", async () => {
-    const data = {
-      name: "Evento de Teste",
-    };
-    const { status } = await api.post("/events").send(data);
+    const {name} = await createEvent();
+    const { status } = await api.post("/events").send(name);
     expect(status).toBe(httpStatus.UNPROCESSABLE_ENTITY)
     
   });
 
   it("should return a stts Conflict because duplicate names.", async () => {
-    await prisma.event.create({
-      data: {
-      name: "Evento de Teste",
-      date: new Date("2025-05-01T00:00:00.000Z"),
-     },
-     });
-    const data = {
-      name: "Evento de Teste",
-      date: new Date("2025-05-03T00:00:00.000Z"),
-    };
-    const { status } = await api.post("/events").send(data);
+    const {name,date} = await createEvent();
+    const { status } = await api.post("/events").send({
+      name: name,
+      date: new Date(date).toISOString()
+    });
+  
     expect(status).toBe(httpStatus.CONFLICT)
   });
 
   it("should update event", async () => {
-    const event = await prisma.event.create({
-      data: {
-        name: "Evento de Teste",
-        date: new Date("2025-05-01T00:00:00.000Z"),
-      },
-    });
-    const eventPut = {
-      name: "Evento Atualizado",
-      date: new Date("2025-06-01T00:00:00.000Z"),
-    };
+    const event = await createEvent();
+    const eventPut =await createEventFactory();
     const { status, body } = await api.put(`/events/${event.id}`).send(eventPut);
 
     expect(status).toBe(httpStatus.OK);
@@ -135,12 +108,7 @@ describe("delete /events",()=>{
     await prisma.event.deleteMany()
   });
   it("should delet event",async ()=>{
-    const {id} = await prisma.event.create({
-       data: {
-       name: "Evento de Teste",
-       date: new Date("2025-05-01T00:00:00.000Z"),
-      },
-      });
+    const {id} = await createEvent();
     
     const {status}= await api.delete(`/events/${id}`)
     expect(status).toBe(httpStatus.NO_CONTENT)

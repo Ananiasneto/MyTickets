@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "description": "Projeto base da API do MyTickets",
   "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "start": "npm run migration:run && npm run seed && node dist/src/server.js",
-    "dev": "ts-node-dev src/server.ts",
-    "migration:run": "prisma migrate deploy",
-    "test:load-envs": "dotenv -e .env.test",
-    "test:migration:run": "npm run test:load-envs prisma migrate deploy",
-    "test": "npm run test:load-envs jest",
-	"test:coverage": "npm run test:load-envs -- jest -- --coverage --runInBand"
-  },
+ "scripts": {
+  "build": "tsc",
+  "start": "npm run migration:run && npm run seed && node dist/src/server.js",
+  "dev": "ts-node-dev src/server.ts",
+  "migration:run": "prisma migrate deploy",
+  "test:load-envs": "dotenv -e .env.test --",
+  "test:migration:run": "npm run test:load-envs -- prisma migrate deploy",
+  "test": "npm run test:load-envs -- jest --runInBand",
+  "test:coverage": "npm run test:load-envs -- jest --coverage --runInBand"
+}
+,
   "keywords": [],
   "author": "",
   "license": "ISC",

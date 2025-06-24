@@ -1,0 +1,32 @@
+services:
+  postgres:
+    image: postgres
+    container_name: mypostgres
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: mytickets
+    volumes:
+      - myvolume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -q -d mytickets -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  
+  backend:
+    image: mybackend
+    container_name: mybackend
+    build: .
+    ports:
+      - 5000:5000
+    depends_on:
+      postgres:
+        condition: service_healthy
+    env_file:
+      - .env
+
+volumes:
+  myvolume:
